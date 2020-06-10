@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+
+    
+
+    
+
+
+
+    <meta charset="utf-8">
+    
+    
+    
+    
+    <title>使用supervisor守护frp | Now you see me! | 夫君子之行，静以修身，俭以养德。非淡泊无以明志，非宁静无以致远。</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    
+    <meta name="theme-color" content="#3F51B5">
+    
+    
+    <meta name="keywords" content="linux">
+    <meta name="description" content="渗透的时候或者平常需要用到内网映射的时候常常会用到frp，但是frp有时会断。以前为了解决这个问题还特意写了个脚本来检查frp进程，现在想起来实在是too young。最近刚好接触到守护进程，就拿frp来试试水，然后supervisor是一款常用的守护进程工具，就决定是你了。">
+<meta name="keywords" content="linux">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用supervisor守护frp">
+<meta property="og:url" content="http:&#x2F;&#x2F;leemeanvvi.github.io&#x2F;2019&#x2F;12&#x2F;14&#x2F;%E4%BD%BF%E7%94%A8supervisor%E5%AE%88%E6%8A%A4frp&#x2F;index.html">
+<meta property="og:site_name" content="Now you see me!">
+<meta property="og:description" content="渗透的时候或者平常需要用到内网映射的时候常常会用到frp，但是frp有时会断。以前为了解决这个问题还特意写了个脚本来检查frp进程，现在想起来实在是too young。最近刚好接触到守护进程，就拿frp来试试水，然后supervisor是一款常用的守护进程工具，就决定是你了。">
+<meta property="og:locale" content="en">
+<meta property="og:updated_time" content="2020-01-05T07:43:28.000Z">
+<meta name="twitter:card" content="summary">
+    
+        <link rel="alternate" type="application/atom+xml" title="Now you see me!" href="/atom.xml">
+    
+    <link rel="shortcut icon" href="/favicon.ico">
+    <link rel="stylesheet" href="//unpkg.com/hexo-theme-material-indigo@latest/css/style.css">
+    <script>window.lazyScripts=[]</script>
+
+    <!-- custom head -->
+    
+
+</head>
+
+<body>
+    <div id="loading" class="active"></div>
+
+    <aside id="menu" class="hide" >
+  <div class="inner flex-row-vertical">
+    <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light" id="menu-off">
+        <i class="icon icon-lg icon-close"></i>
+    </a>
+    <div class="brand-wrap" style="background-image:url(/img/brand.jpg)">
+      <div class="brand">
+        <a href="/" class="avatar waves-effect waves-circle waves-light">
+          <img src="/img/whoami.jpg">
+        </a>
+        <hgroup class="introduce">
+          <h5 class="nickname">Kerberos</h5>
+          <a href="mailto:fkBCDlIUiZFe@protonmail.com" title="fkBCDlIUiZFe@protonmail.com" class="mail">fkBCDlIUiZFe@protonmail.com</a>
+        </hgroup>
+      </div>
+    </div>
+    <div class="scroll-wrap flex-col">
+      <ul class="nav">
+        
+            <li class="waves-block waves-effect">
+              <a href="/"  >
+                <i class="icon icon-lg icon-home"></i>
+                Home
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/archives"  >
+                <i class="icon icon-lg icon-archives"></i>
+                Archives
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/tags"  >
+                <i class="icon icon-lg icon-tags"></i>
+                Tags
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/categories"  >
+                <i class="icon icon-lg icon-th-list"></i>
+                Categories
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="https://github.com/leemeanvvi" target="_blank" >
+                <i class="icon icon-lg icon-github"></i>
+                Github
+              </a>
+            </li>
+        
+            <li class="waves-block waves-effect">
+              <a href="/about"  >
+                <i class="icon icon-lg icon-rocket"></i>
+                About
+              </a>
+            </li>
+        
+      </ul>
+    </div>
+  </div>
+</aside>
+
+    <main id="main">
+        <header class="top-header" id="header">
+    <div class="flex-row">
+        <a href="javascript:;" class="header-icon waves-effect waves-circle waves-light on" id="menu-toggle">
+          <i class="icon icon-lg icon-navicon"></i>
+        </a>
+        <div class="flex-col header-title ellipsis">使用supervisor守护frp</div>
+        
+        
+    </div>
+</header>
+<header class="content-header post-header">
+
+    <div class="container fade-scale">
+        <h1 class="title">使用supervisor守护frp</h1>
+        <h5 class="subtitle">
+            
+                <time datetime="2019-12-14T14:44:10.000Z" itemprop="datePublished" class="page-time">
+  2019-12-14
+</time>
+
+
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/misc/">misc</a></li></ul>
+
+            
+        </h5>
+    </div>
+
+    
+
+
+</header>
+
+
+<div class="container body-wrap">
+    
+    <aside class="post-widget">
+        <nav class="post-toc-wrap post-toc-shrink" id="post-toc">
+            <h4>TOC</h4>
+            <ol class="post-toc"><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#安装"><span class="post-toc-number">1.</span> <span class="post-toc-text">安装</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#配置文件"><span class="post-toc-number">2.</span> <span class="post-toc-text">配置文件</span></a></li><li class="post-toc-item post-toc-level-3"><a class="post-toc-link" href="#启动"><span class="post-toc-number">3.</span> <span class="post-toc-text">启动</span></a></li></ol>
+        </nav>
+    </aside>
+
+
+<article id="post-使用supervisor守护frp"
+  class="post-article article-type-post fade" itemprop="blogPost">
+
+    <div class="post-card">
+        <h1 class="post-card-title">使用supervisor守护frp</h1>
+        <div class="post-meta">
+            <time class="post-time" title="2019-12-14 22:44:10" datetime="2019-12-14T14:44:10.000Z"  itemprop="datePublished">2019-12-14</time>
+
+            
+	<ul class="article-category-list"><li class="article-category-list-item"><a class="article-category-list-link" href="/categories/misc/">misc</a></li></ul>
+
+
+
+            
+
+        </div>
+        <div class="post-content" id="post-content" itemprop="postContent">
+            <p>渗透的时候或者平常需要用到内网映射的时候常常会用到frp，但是frp有时会断。以前为了解决这个问题还特意写了个脚本来检查frp进程，现在想起来实在是too young。最近刚好接触到守护进程，就拿frp来试试水，然后supervisor是一款常用的守护进程工具，就决定是你了。</p>
+<a id="more"></a>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>我使用的是ubuntu，用apt安装即可</p>
+<p><code>apt-get install supervisor</code></p>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><p>supervisor的配置文件是/etc/supervisor/supervisord.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">; supervisor config file</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">[unix_http_server]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">file&#x3D;&#x2F;var&#x2F;run&#x2F;supervisor.sock   ; (the path to the socket file)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">chmod&#x3D;0700                       ; sockef file mode (default 0700)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">[supervisord]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">logfile&#x3D;&#x2F;var&#x2F;log&#x2F;supervisor&#x2F;supervisord.log ; (main log file;default $CWD&#x2F;supervisord.log)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">9</span></pre></td><td class="code"><pre><span class="line">pidfile&#x3D;&#x2F;var&#x2F;run&#x2F;supervisord.pid ; (supervisord pidfile;default supervisord.pid)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">10</span></pre></td><td class="code"><pre><span class="line">childlogdir&#x3D;&#x2F;var&#x2F;log&#x2F;supervisor            ; (&#39;AUTO&#39; child log dir, default $TEMP)</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">11</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">12</span></pre></td><td class="code"><pre><span class="line">; the below section must remain in the config file for RPC</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">13</span></pre></td><td class="code"><pre><span class="line">; (supervisorctl&#x2F;web interface) to work, additional interfaces may be</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">14</span></pre></td><td class="code"><pre><span class="line">; added by defining them in separate rpcinterface: sections</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">15</span></pre></td><td class="code"><pre><span class="line">[rpcinterface:supervisor]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">16</span></pre></td><td class="code"><pre><span class="line">supervisor.rpcinterface_factory &#x3D; supervisor.rpcinterface:make_main_rpcinterface</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">17</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">18</span></pre></td><td class="code"><pre><span class="line">[supervisorctl]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">19</span></pre></td><td class="code"><pre><span class="line">serverurl&#x3D;unix:&#x2F;&#x2F;&#x2F;var&#x2F;run&#x2F;supervisor.sock ; use a unix:&#x2F;&#x2F; URL  for a unix socket</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">20</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">21</span></pre></td><td class="code"><pre><span class="line">; The [include] section can just contain the &quot;files&quot; setting.  This</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">22</span></pre></td><td class="code"><pre><span class="line">; setting can list multiple files (separated by whitespace or</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">23</span></pre></td><td class="code"><pre><span class="line">; newlines).  It can also contain wildcards.  The filenames are</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">24</span></pre></td><td class="code"><pre><span class="line">; interpreted as relative to this file.  Included files *cannot*</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">25</span></pre></td><td class="code"><pre><span class="line">; include files themselves.</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">26</span></pre></td><td class="code"><pre><span class="line"></span></pre></td></tr><tr><td class="gutter"><pre><span class="line">27</span></pre></td><td class="code"><pre><span class="line">[include]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">28</span></pre></td><td class="code"><pre><span class="line">files &#x3D; &#x2F;etc&#x2F;supervisor&#x2F;conf.d&#x2F;*.conf</span></pre></td></tr></table></figure>
+<p>可以看到include了/etc/supervisor/conf.d/目录下面的conf文件。我们要守护的进程配置文件就要添加在该目录。这里我们新建一个frp.conf文件，添加内容如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span></pre></td><td class="code"><pre><span class="line">[program:frp]</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">2</span></pre></td><td class="code"><pre><span class="line">directory&#x3D;&#x2F;root&#x2F;software&#x2F;frp&#x2F;</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">3</span></pre></td><td class="code"><pre><span class="line">command&#x3D;&#x2F;root&#x2F;software&#x2F;frp&#x2F;frps -c &#x2F;root&#x2F;software&#x2F;frp&#x2F;frps.ini</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">4</span></pre></td><td class="code"><pre><span class="line">autostart&#x3D;true</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">5</span></pre></td><td class="code"><pre><span class="line">autorestart&#x3D;true</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">6</span></pre></td><td class="code"><pre><span class="line">startretries&#x3D;10</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">7</span></pre></td><td class="code"><pre><span class="line">redirect_stderr&#x3D;true</span></pre></td></tr><tr><td class="gutter"><pre><span class="line">8</span></pre></td><td class="code"><pre><span class="line">stdout_logfile&#x3D;&#x2F;tmp&#x2F;rdp.log</span></pre></td></tr></table></figure>
+<p>program参数为待会启动的时候的项目名</p>
+<p>directory参数为要运行的脚本或程序所在的项目</p>
+<p>command参数为要运行该脚本或程序时执行的命令</p>
+<p>其他参数顾名思义就好了，具体意义网上也能找到更详细的解答</p>
+<h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><p>使用<code>supervisorctl start frp</code>命令（根据program名字）即可用supervisor启动frp进程</p>
+<p>在启动的时候遇到了一个坑，在保存了配置文件后，输入上述命令显示</p>
+<p><code>frp: ERROR (no such process)</code></p>
+<p>然后查看status，重启supervisor服务之后都不行，一度怀疑人生，最后在大佬的帮助下才知道还要执行<code>supervisorctl reload</code>才会载入上述所写的配置文件，淦。</p>
+
+        </div>
+
+        <blockquote class="post-copyright">
+    
+    <div class="content">
+        
+<span class="post-time">
+    Last updated: <time datetime="2020-01-05T07:43:28.000Z" itemprop="dateUpdated">2020-01-05 15:43:28</time>
+</span><br>
+
+
+        
+        Why so serious?
+        
+    </div>
+    
+    <footer>
+        <a href="http://leemeanvvi.github.io">
+            <img src="/img/whoami.jpg" alt="Kerberos">
+            Kerberos
+        </a>
+    </footer>
+</blockquote>
+
+        
+
+
+        <div class="post-footer">
+            
+	<ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/" rel="tag">linux</a></li></ul>
+
+
+            
+
+
+        </div>
+    </div>
+
+    
+<nav class="post-nav flex-row flex-justify-between">
+  
+    <div class="waves-block waves-effect prev">
+      <a href="/2019/12/20/notes/" id="post-prev" class="post-nav-link">
+        <div class="tips"><i class="icon icon-angle-left icon-lg icon-pr"></i> Prev</div>
+        <h4 class="title">notes</h4>
+      </a>
+    </div>
+  
+
+  
+    <div class="waves-block waves-effect next">
+      <a href="/2019/12/12/rip-wp/" id="post-next" class="post-nav-link">
+        <div class="tips">Next <i class="icon icon-angle-right icon-lg icon-pl"></i></div>
+        <h4 class="title">rip_wp</h4>
+      </a>
+    </div>
+  
+</nav>
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</article>
+
+
+
+</div>
+
+        <footer class="footer">
+    <div class="top">
+        
+
+        <p>
+            
+                <span><a href="/atom.xml" target="_blankccc" class="rss" title="rss"><i class="icon icon-lg icon-rss"></i></a></span>
+            
+            <span>This blog is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.</span>
+        </p>
+    </div>
+    <div class="bottom">
+        <p><span>Kerberos &copy; 2019 - 2020</span>
+            <span>
+                
+                Power by <a href="http://hexo.io/" target="_blank">Hexo</a> Theme <a href="https://github.com/yscoder/hexo-theme-indigo" target="_blank">indigo</a>
+            </span>
+        </p>
+    </div>
+</footer>
+
+    </main>
+    <div class="mask" id="mask"></div>
+<a href="javascript:;" id="gotop" class="waves-effect waves-circle waves-light"><span class="icon icon-lg icon-chevron-up"></span></a>
+
+
+    <script src="//cdn.bootcss.com/node-waves/0.7.4/waves.min.js"></script>
+<script>
+var BLOG = { ROOT: '/', SHARE: false, REWARD: false };
+
+
+</script>
+
+<script src="//unpkg.com/hexo-theme-material-indigo@latest/js/main.min.js"></script>
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    var OriginTitile = document.title, titleTime;
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            document.title = '死鬼去哪里了！';
+            clearTimeout(titleTime);
+        } else {
+            document.title = '(つェ⊂)咦!又好了!';
+            titleTime = setTimeout(function() {
+                document.title = OriginTitile;
+            },2000);
+        }
+    });
+})();
+</script>
+
+
+
+<script src="/live2dw/lib/L2Dwidget.min.js?094cbace49a39548bed64abff5988b05"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/hijiki.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"log":false});</script></body>
+</html>
